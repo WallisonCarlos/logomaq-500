@@ -71,6 +71,85 @@
 		}
 	}
 	
+	
+	function LM_NovoSlide ($re_data) {
+		global $conn, $error;
+		if (empty($re_data['imagem_slideshow'])) {
+			$error = "Selecione uma imagem!";
+			return false;
+		} else if (empty($re_data['titulo_slideshow']) && !empty($re_data['descricao_slideshow'])) {
+			$error = "Digite um título!";
+		} else if (empty($re_data['rotulo_botao_slideshow']) && !empty($re_data['link_botao_slideshow'])) {
+			$error = "Digite um rótulo para o botão!";
+		} else if (!empty($re_data['rotulo_botao_slideshow']) && empty($re_data['link_botao_slideshow'])) {
+			$error = "Digite um link para o botão!";
+		}  else {
+			$fields  = '`' . implode('`, `', array_keys($re_data)) . '`';
+			$data    = '\'' . implode('\', \'', $re_data) . '\'';
+			$query   = mysqli_query($conn, "INSERT INTO logomaq_slideshow ({$fields}) VALUES ({$data})");
+			return mysqli_insert_id($conn);
+		}
+	}
+	
+	
+	function LM_ShareFile($data = array(), $type = 0) {
+		global $conn;
+		$allowed = '';
+		if (empty($data)) {
+			return false;
+		}
+		/*
+		if (1 == 1) {
+			if (isset($data['types'])) {
+				$allowed = $data['types'];
+			} else {
+				$allowed = "jpg,png,jpeg,gif";
+			}
+		} else {
+			$allowed = 'jpg,png,jpeg,gif';
+		}*/
+		$new_string        = pathinfo($data['name'], PATHINFO_FILENAME) . '.' . strtolower(pathinfo($data['name'], PATHINFO_EXTENSION));
+		$extension_allowed = explode(',', $allowed);
+		$file_extension    = pathinfo($new_string, PATHINFO_EXTENSION);
+		/*
+		if (!in_array($file_extension, $extension_allowed)) {
+			return false;
+		}*/
+		if ($data['size'] > 100000000) {
+			return false;
+		}
+		if ($file_extension == 'jpg' || $file_extension == 'jpeg' || $file_extension == 'png' || $file_extension == 'gif') {
+			$folder   = 'photos';
+			$fileType = 'image';
+		} else if ($file_extension == 'mp4' || $file_extension == 'mov' || $file_extension == 'webm' || $file_extension == 'flv') {
+			$folder   = 'videos';
+			$fileType = 'video';
+		} else if ($file_extension == 'mp3' || $file_extension == 'wav') {
+			$folder   = 'sounds';
+			$fileType = 'soundFile';
+		} else {
+			$folder   = 'files';
+			$fileType = 'file';
+		}
+		if (empty($folder) || empty($fileType)) {
+			return false;
+		}
+		/*
+		$mime_types = explode(',', str_replace(' ', '', "text/plain,video/mp4,video/mov,video/mpeg,video/flv,video/avi,video/webm,audio/wav,audio/mpeg,video/quicktime,audio/mp3,image/png,image/jpeg,image/gif,application/pdf,application/msword,application/zip,application/x-rar-compressed,text/pdf,application/x-pointplus,text/css". ',application/octet-stream'));
+		if (!in_array($data['type'], $mime_types)) {
+			return false;
+		}*/
+		$dir         = "upload";
+		$filename    = $dir . '/' . XC_GenerateKey() . '_' . date('d') . '_' . md5(time()) . "_{$fileType}.{$file_extension}";
+		$second_file = pathinfo($filename, PATHINFO_EXTENSION);
+		if (move_uploaded_file($data['file'], $filename)) {
+			$last_data             = array();
+			$last_data['filename'] = $filename;
+			$last_data['name']     = $data['name'];
+			return $last_data;
+		}
+	}
+	
 	function XC_LoginCliente($login, $senha) {
 		global $conn;
 		if (!empty($login) && !empty($senha)) {
@@ -972,63 +1051,7 @@
 		return true;
 	}
 	
-	function XC_ShareFile($data = array(), $type = 0) {
-		global $conn;
-		$allowed = '';
-		if (empty($data)) {
-			return false;
-		}
-		/*
-		if (1 == 1) {
-			if (isset($data['types'])) {
-				$allowed = $data['types'];
-			} else {
-				$allowed = "jpg,png,jpeg,gif";
-			}
-		} else {
-			$allowed = 'jpg,png,jpeg,gif';
-		}*/
-		$new_string        = pathinfo($data['name'], PATHINFO_FILENAME) . '.' . strtolower(pathinfo($data['name'], PATHINFO_EXTENSION));
-		$extension_allowed = explode(',', $allowed);
-		$file_extension    = pathinfo($new_string, PATHINFO_EXTENSION);
-		/*
-		if (!in_array($file_extension, $extension_allowed)) {
-			return false;
-		}*/
-		if ($data['size'] > 100000000) {
-			return false;
-		}
-		if ($file_extension == 'jpg' || $file_extension == 'jpeg' || $file_extension == 'png' || $file_extension == 'gif') {
-			$folder   = 'photos';
-			$fileType = 'image';
-		} else if ($file_extension == 'mp4' || $file_extension == 'mov' || $file_extension == 'webm' || $file_extension == 'flv') {
-			$folder   = 'videos';
-			$fileType = 'video';
-		} else if ($file_extension == 'mp3' || $file_extension == 'wav') {
-			$folder   = 'sounds';
-			$fileType = 'soundFile';
-		} else {
-			$folder   = 'files';
-			$fileType = 'file';
-		}
-		if (empty($folder) || empty($fileType)) {
-			return false;
-		}
-		/*
-		$mime_types = explode(',', str_replace(' ', '', "text/plain,video/mp4,video/mov,video/mpeg,video/flv,video/avi,video/webm,audio/wav,audio/mpeg,video/quicktime,audio/mp3,image/png,image/jpeg,image/gif,application/pdf,application/msword,application/zip,application/x-rar-compressed,text/pdf,application/x-pointplus,text/css". ',application/octet-stream'));
-		if (!in_array($data['type'], $mime_types)) {
-			return false;
-		}*/
-		$dir         = "upload";
-		$filename    = $dir . '/' . XC_GenerateKey() . '_' . date('d') . '_' . md5(time()) . "_{$fileType}.{$file_extension}";
-		$second_file = pathinfo($filename, PATHINFO_EXTENSION);
-		if (move_uploaded_file($data['file'], $filename)) {
-			$last_data             = array();
-			$last_data['filename'] = $filename;
-			$last_data['name']     = $data['name'];
-			return $last_data;
-		}
-	}
+	
 	
 	function XC_CompressImage($source_url, $destination_url, $quality) {
 		$imgsize = getimagesize($source_url);

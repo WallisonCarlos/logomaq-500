@@ -3,7 +3,57 @@
 	require_once "functions/one.php";
 	date_default_timezone_set('America/Fortaleza');
 	if (isset($_GET['f']) OR isset($_POST['f'])) {
-		$f = XC_Secure((!empty($_GET['f'])) ? $_GET['f'] : $_POST['f']);
+		$f = LM_Secure((!empty($_GET['f'])) ? $_GET['f'] : $_POST['f']);
+		
+		if ($f == "novoSlide") {	
+			if (isset($_FILES['imagem_slideshow']['name'])) {
+				$invalid_file = 0;
+				if ($_FILES['imagem_slideshow']['size'] > 10000000) {
+					$invalid_file = 1;
+				} else {
+					$fileInfo = array(
+						'file' => $_FILES["imagem_slideshow"]["tmp_name"],
+						'name' => $_FILES['imagem_slideshow']['name'],
+						'size' => $_FILES["imagem_slideshow"]["size"],
+						'type' => $_FILES["imagem_slideshow"]["type"]
+					);
+					$media    = LM_ShareFile($fileInfo);
+					if (!empty($media)) {
+						$mediaFilename = $media['filename'];
+						$mediaName     = $media['name'];
+					}
+				}
+			}
+			
+			$slide_data = array(
+				"titulo_slideshow" => LM_Secure($_POST['titulo_slideshow']),
+				"descricao_slideshow" => LM_Secure($_POST['descricao_slideshow']),
+				"imagem_slideshow" => $mediaFilename,
+				"link_botao_slideshow" => LM_Secure($_POST['link_botao_slideshow']),
+				"rotulo_botao_slideshow" => LM_Secure($_POST['rotulo_botao_slideshow'])
+			);
+			$error = "";
+			$data = array();
+			$slide_id = LM_NovoSlide($slide_data);
+			if ($slide_id) {
+				$data = array(
+					'status' => 200,
+					'invalid_file' => $invalid_file,
+					'success' => "Slide cadastrado com sucesso cadastrado com sucesso, veja clicando <a href='?pag=listarSlides'>aqui</a>!"
+				);
+			} else {
+				$data = array(
+					'status' => 400,
+					'invalid_file' => $invalid_file,
+					'error' => $error
+				);
+			} 
+			header("Content-type: application/json");
+			echo json_encode($data);
+			exit();
+		}
+		
+		
 		if ($f == "novoUsuario") {
 			$user_data = array(
 				"nome" => XC_Secure($_POST['nome']),
@@ -76,184 +126,6 @@
 			exit();
 		}
 		
-		if ($f == "removeCliente") {
-			$error = "";
-			$data = array();
-			$cliente_id = XC_RemoveCliente ($_POST['id']);
-			if ($cliente_id) {
-				$data = array(
-					'status' => 200,
-					'success' => "Cliente removido com sucesso!"
-				);
-			} else {
-				$data = array(
-					'status' => 400,
-					'error' => $error
-				);
-			} 
-			header("Content-type: application/json");
-			echo json_encode($data);
-			exit();
-		}
-		
-		if ($f == "novo_cliente_associado") {
-			$error = "";
-			$data = array();
-			$id  = (isset($_GET['id'])) ? $_GET['id'] : $_POST['id'];
-			if (!XC_CheckClienteAssosiado($id)) {
-				$id = XC_NovoClienteAssociado ($id);
-			}
-			if ($id) {
-				$data = array(
-					'status' => 200,
-					'success' => "Cliente associado com sucesso!"
-				);
-			} else {
-				$data = array(
-					'status' => 400,
-					'error' => $error
-				);
-			} 
-			header("Content-type: application/json");
-			echo json_encode($data);
-			exit();
-		}
-		
-		if ($f == "removeMesa") {
-			$error = "";
-			$data = array();
-			$mesa_id = XC_RemoveMesa ($_POST['id']);
-			if ($mesa_id) {
-				$data = array(
-					'status' => 200,
-					'success' => "Mesa removida com sucesso!"
-				);
-			} else {
-				$data = array(
-					'status' => 400,
-					'error' => $error
-				);
-			} 
-			header("Content-type: application/json");
-			echo json_encode($data);
-			exit();
-		}
-		
-		if ($f == "removeDesconto") {
-			$error = "";
-			$data = array();
-			$desconto_id = XC_RemoveDesconto ($_POST['id']);
-			if ($desconto_id) {
-				$data = array(
-					'status' => 200,
-					'success' => "Desconto removido com sucesso!"
-				);
-			} else {
-				$data = array(
-					'status' => 400,
-					'error' => $error
-				);
-			} 
-			header("Content-type: application/json");
-			echo json_encode($data);
-			exit();
-		}
-		
-		if ($f == "removeProduto") {
-			$error = "";
-			$data = array();
-			$produto_id = XC_RemoveProduto ($_POST['cod']);
-			if ($produto_id) {
-				$data = array(
-					'status' => 200,
-					'success' => "Produto removido com sucesso!"
-				);
-			} else {
-				$data = array(
-					'status' => 400,
-					'error' => $error
-				);
-			} 
-			header("Content-type: application/json");
-			echo json_encode($data);
-			exit();
-		}
-		
-		if ($f == "novoCliente") {
-			$user_data = array(
-				"nome" => XC_Secure($_POST['nome']),
-				"sobrenome" => XC_Secure($_POST['sobrenome']),
-				"login" => XC_Secure($_POST['login']),
-				"senha" => XC_Crip(XC_Secure($_POST['senha'])),
-				"email" => XC_Secure($_POST['email']),
-				"telefone" => XC_Secure($_POST['telefone']),
-				"cidade" => XC_Secure($_POST['cidade']),
-				"bairro" => XC_Secure($_POST['bairro']),
-				"rua" => XC_Secure($_POST['rua']),
-				"numero" => XC_Secure($_POST['numero']),
-				"cadastro" => time()
-			);
-			XC_Log("Aqui 1");
-			$error = "";
-			$data = array();
-			$cliente_id = XC_NovoCliente ($user_data);
-			XC_Log("Aqui 2");
-			if ($cliente_id) {
-				XC_Log("Aqui 3 cliente id =".$cliente_id);
-				$data = array(
-					'status' => 200,
-					'cliente_data' => XC_GetCliente($cliente_id),
-					'success' => "Cliente cadastrado com sucesso!"
-				);
-			} else {
-				XC_Log("Aqui 4");
-				$data = array(
-					'status' => 400,
-					'error' => $error
-				);
-			} 
-			XC_Log("Aqui 5");
-			header("Content-type: application/json");
-			echo json_encode($data);
-			exit();
-		}
-		
-		if ($f == "alteraContaCliente") {
-			if (!isset($_SESSION)) {
-				session_start();
-			}
-			$cliente = XC_GetClienteFromLogin($_SESSION['cliente_session']);
-			$user_data = array(
-				"id" => $cliente['id'],
-				"nome" => XC_Secure($_POST['nome']),
-				"sobrenome" => XC_Secure($_POST['sobrenome']),
-				"login" => XC_Secure($_POST['login']),
-				"login_antigo" => XC_Secure($_POST['login_antigo']),
-				"email" => XC_Secure($_POST['email']),
-				"telefone" => XC_Secure($_POST['telefone']),
-				"cidade" => XC_Secure($_POST['cidade']),
-				"bairro" => XC_Secure($_POST['bairro']),
-				"rua" => XC_Secure($_POST['rua']),
-				"numero" => XC_Secure($_POST['numero'])
-			);
-			$error = "";
-			$data = array();
-			$cliente_id = XC_AtualizaContaCliente ($user_data);
-			if ($cliente_id) {
-				$data = array(
-					'status' => 200,
-					'success' => "Cliente atualizado com sucesso!"
-				);
-			} else {
-				$data = array(
-					'status' => 400,
-					'error' => $error
-				);
-			} 
-			header("Content-type: application/json");
-			echo json_encode($data);
-			exit();
-		}
 		
 		if ($f == "abrirAlterarUsuario") { 
 			$id = XC_Secure($_GET['id']);
@@ -533,71 +405,6 @@
 			exit();
 		}
 		
-		if ($f == "novoProduto") {	
-			if (isset($_FILES['imagem']['name'])) {
-				$invalid_file = 0;
-				if ($_FILES['imagem']['size'] > 10000000) {
-					$invalid_file = 1;
-				} else {
-					$fileInfo = array(
-						'file' => $_FILES["imagem"]["tmp_name"],
-						'name' => $_FILES['imagem']['name'],
-						'size' => $_FILES["imagem"]["size"],
-						'type' => $_FILES["imagem"]["type"]
-					);
-					$media    = XC_ShareFile($fileInfo);
-					if (!empty($media)) {
-						$mediaFilename = $media['filename'];
-						$mediaName     = $media['name'];
-					}
-				}
-			}
-			
-			$produto_data = array(
-				"nome" => XC_Secure($_POST['nome']),
-				"descricao" => XC_Secure($_POST['descricao']),
-				"imagem" => $mediaFilename,
-				"id_categoria" => XC_Secure($_POST['categoria']),
-				"destino" => XC_Secure($_POST['destino'])
-			);
-			$error = "";
-			$data = array();
-			$produto_id = XC_NovoProduto ($produto_data);
-			if ($produto_id) {
-				$preco_data = array(
-					"produto" => $produto_id,
-					"preco_compra" => XC_Secure($_POST['preco_compra']),
-					"preco_venda" => XC_Secure($_POST['preco_venda']),
-					"data" => time()
-				);
-				$preco_id = XC_NovoPrecoProduto ($preco_data);
-				$atualiza_produto_data = array(
-					"produto" => $produto_id,
-					"preco" => $preco_id
-				);
-				XC_AtualizaPrecoProduto ($atualiza_produto_data);
-				$estoque_data = array(
-					"produto" => $produto_id,
-					"quantidade" => XC_Secure($_POST['quantidade'])
-				);
-				XC_NovoEstoque($estoque_data);
-				$data = array(
-					'status' => 200,
-					'invalid_file' => $invalid_file,
-					'success' => "Produto cadastrado com sucesso!"
-				);
-			} else {
-				$data = array(
-					'status' => 400,
-					'invalid_file' => $invalid_file,
-					'error' => $error
-				);
-				XC_Log($error);
-			} 
-			header("Content-type: application/json");
-			echo json_encode($data);
-			exit();
-		}
 		
 		if ($f == "atualizaProduto") {	
 			$mediaFilename = "";
