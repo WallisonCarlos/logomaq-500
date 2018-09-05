@@ -9,7 +9,13 @@
 			include "listarSlides.php";
 		} else if ($pag == "editarSlide") {
 			include "editarSlide.php";
-		}  else {
+		} else if ($pag == "novaCategoriaServico") {
+			include "adicionarCategoriaServico.php";
+		} else if ($pag == "listarCategoriasServico") {
+			include "listarCategoriasServico.php";
+		} else if ($pag == "editarCategoria") {
+			include "editarCategoriaServico.php";
+		} else {
 			echo "Página não encontrada";
 		}
 	} else {

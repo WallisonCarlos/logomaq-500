@@ -91,6 +91,19 @@
 		}
 	}
 	
+	function LM_NovaCategoria ($re_data) {
+		global $conn, $error;
+		if (empty($re_data['titulo_categoria'])) {
+			$error = "Digite o título da categoria!";
+			return false;
+		} else {
+			$fields  = '`' . implode('`, `', array_keys($re_data)) . '`';
+			$data    = '\'' . implode('\', \'', $re_data) . '\'';
+			$query   = mysqli_query($conn, "INSERT INTO logomaq_categoria_servico ({$fields}) VALUES ({$data})");
+			return mysqli_insert_id($conn);
+		}
+	}
+	
 	
 	function LM_ShareFile($data = array(), $type = 0) {
 		global $conn;
@@ -161,6 +174,16 @@
 		return $data;
 	}
 	
+	function LM_GetCategorias(){
+		global $conn;
+		$data = array();
+		$query = mysqli_query($conn, "SELECT * FROM logomaq_categoria_servico");
+		while ($final_fetched_data = mysqli_fetch_assoc($query)) {
+			$data[] = $final_fetched_data;
+		}
+		return $data;
+	}
+	
 	
 	function LM_GetSlide($id){
 		global $conn;
@@ -169,6 +192,20 @@
 			return false;
 		}
 		$query = mysqli_query($conn, "SELECT * FROM logomaq_slideshow WHERE `id_slideshow` = {$id}");
+		if (mysqli_num_rows($query) == 1) {
+			$final_fetched_data              = mysqli_fetch_assoc($query);
+			return $final_fetched_data;
+		}
+		return false;
+	}
+	
+	function LM_GetCategoria($id){
+		global $conn;
+		$id = LM_Secure($id);
+		if (empty($id) || !is_numeric($id) || $id < 1) {
+			return false;
+		}
+		$query = mysqli_query($conn, "SELECT * FROM logomaq_categoria_servico WHERE `id_categoria` = {$id}");
 		if (mysqli_num_rows($query) == 1) {
 			$final_fetched_data              = mysqli_fetch_assoc($query);
 			return $final_fetched_data;
@@ -196,6 +233,21 @@
 		}
 	}
 	
+	function LM_AtualizaCategoira ($re_data) {
+		global $conn, $error;
+		if (empty($re_data['titulo_categoria'])) {
+			$error = "Digite um título!";
+		}else {
+			$query   = mysqli_query($conn, "UPDATE logomaq_categoria_servico SET titulo_categoria='".$re_data['titulo_categoria']."' WHERE id_categoria = ".$re_data['id_categoria']."");
+			if ($query) {
+				return true;
+			} else {
+				$error = mysqli_error($conn);
+				return false;
+			}
+		}
+	}
+	
 	function LM_RemoveSlide($slide_id){
 		global $conn, $error;
 		if (!isset($_SESSION)) {
@@ -207,6 +259,25 @@
 			return false;			
 		} else {
 			$query   = mysqli_query($conn, "DELETE FROM logomaq_slideshow WHERE `id_slideshow`={$slide_id}");
+			if ($query) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
+	
+	function LM_RemoveCategoria($categoria_id){
+		global $conn, $error;
+		if (!isset($_SESSION)) {
+			session_start();
+		}
+		$categoria_id = LM_Secure($categoria_id);
+		if (empty($categoria_id) OR !intval($categoria_id)) {
+			$error = "Categoria inválida!";
+			return false;			
+		} else {
+			$query   = mysqli_query($conn, "DELETE FROM logomaq_categoria_servico WHERE `id_categoria`={$categoria_id}");
 			if ($query) {
 				return true;
 			} else {

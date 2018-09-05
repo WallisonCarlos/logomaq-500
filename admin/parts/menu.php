@@ -28,10 +28,10 @@
                                     <a href="index2.html">Listar todos</a>
                                 </li>
 								<li>
-                                    <a href="index.html">Criar nova categoria</a>
+                                    <a href="?pag=novaCategoriaServico">Criar nova categoria</a>
                                 </li>
                                 <li>
-                                    <a href="index2.html">Listar todas categorias</a>
+                                    <a href="?pag=listarCategoriasServico">Listar todas categorias</a>
                                 </li>
                             </ul>
                         </li>

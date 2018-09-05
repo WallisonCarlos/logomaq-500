@@ -54,8 +54,31 @@
 			exit();
 		}
 		
+		if ($f == "novaCategoria") {	
+			
+			$categoria_data = array(
+				"titulo_categoria" => LM_Secure($_POST['titulo_categoria'])
+			);
+			$error = "";
+			$data = array();
+			$categoria = LM_NovaCategoria($categoria_data);
+			if ($categoria) {
+				$data = array(
+					'status' => 200,
+					'success' => "Categoria cadastrada com sucesso, veja clicando <a href='?pag=listarCategoriasServico'>aqui</a>!"
+				);
+			} else {
+				$data = array(
+					'status' => 400,
+					'error' => $error
+				);
+			} 
+			header("Content-type: application/json");
+			echo json_encode($data);
+			exit();
+		}
+		
 		if ($f == "atualizaSlide") {	
-			$mediaFilename = "";
 			$slide_data = array(
 				"titulo_slideshow" => LM_Secure($_POST['titulo_slideshow']),
 				"descricao_slideshow" => LM_Secure($_POST['descricao_slideshow']),
@@ -83,6 +106,31 @@
 			exit();
 		}
 		
+		if ($f == "atualizaCategoria") {	
+			$categoria_data = array(
+				"titulo_categoria" => LM_Secure($_POST['titulo_categoria']),
+				"id_categoria" => LM_Secure($_POST['id_categoria'])
+
+			);
+			$error = "";
+			$data = array();
+			$categoria_id = LM_AtualizaCategoira ($categoria_data);
+			if ($categoria_id) {
+				$data = array(
+					'status' => 200,
+					'success' => "Categoria atualizada com sucesso!"
+				);
+			} else {
+				$data = array(
+					'status' => 400,
+					'error' => $error
+				);
+			} 
+			header("Content-type: application/json");
+			echo json_encode($data);
+			exit();
+		}
+		
 		
 		if ($f == "removeSlide") {
 			$error = "";
@@ -93,6 +141,27 @@
 				$data = array(
 					'status' => 200,
 					'success' => "Slide removido com sucesso!"
+				);
+			} else {
+				$data = array(
+					'status' => 400,
+					'error' => $error
+				);
+			} 
+			header("Content-type: application/json");
+			echo json_encode($data);
+			exit();
+		}
+		
+		if ($f == "removeCategoria") {
+			$error = "";
+			$data = array();
+			$id = LM_Secure($_POST['id_categoria']);
+			$categoria = LM_RemoveCategoria ($id);
+			if ($categoria) {
+				$data = array(
+					'status' => 200,
+					'success' => "Categoria removida com sucesso!"
 				);
 			} else {
 				$data = array(
