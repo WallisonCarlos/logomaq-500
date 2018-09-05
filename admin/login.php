@@ -47,7 +47,24 @@
                             </a>
                         </div>
                         <div class="login-form">
-                            <form action="" method="post">
+                            <form action="logar.php" method="post">
+							<?php 
+								if (isset($_GET['login_errado']) && isset($_GET['logar'])) { 
+									$erro = $_GET['login_errado'];
+									$logar = $_GET['logar'];
+									if($erro == "erro"){	
+										echo '<div class="alert alert-danger" role="alert">
+											  Login e/ou senha não conferem.
+											</div>';
+									}		
+									elseif($logar == "errar"){
+										echo "Você tem permissão para acessar somente com aparelho mobile.";
+										echo '<div class="alert alert-danger" role="alert">
+											  Você tem permissão para acessar somente com aparelho mobile.
+											</div>';
+									}
+								}
+							?>
                                 <div class="form-group">
                                     <label>Usuário</label>
                                     <input class="au-input au-input--full" type="text" name="usuario" placeholder="Seu usuário">
