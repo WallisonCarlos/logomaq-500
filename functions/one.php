@@ -150,6 +150,89 @@
 		}
 	}
 	
+	function LM_GetSlides(){
+		global $conn;
+		$data = array();
+		$query = mysqli_query($conn, "SELECT * FROM logomaq_slideshow");
+		while ($final_fetched_data = mysqli_fetch_assoc($query)) {
+			$final_fetched_data['link_botao_slideshow'] =  "<a href='".$final_fetched_data['link_botao_slideshow']."' target='_blank'>Ver</a>";
+			$data[] = $final_fetched_data;
+		}
+		return $data;
+	}
+	
+	
+	function LM_GetSlide($id){
+		global $conn;
+		$id = LM_Secure($id);
+		if (empty($id) || !is_numeric($id) || $id < 1) {
+			return false;
+		}
+		$query = mysqli_query($conn, "SELECT * FROM logomaq_slideshow WHERE `id_slideshow` = {$id}");
+		if (mysqli_num_rows($query) == 1) {
+			$final_fetched_data              = mysqli_fetch_assoc($query);
+			return $final_fetched_data;
+		}
+		return false;
+	}
+	
+	function LM_AtualizaSlide ($re_data) {
+		global $conn, $error;
+		if (empty($re_data['titulo_slideshow']) && !empty($re_data['descricao_slideshow'])) {
+			$error = "Digite um título!";
+		} else if (empty($re_data['rotulo_botao_slideshow']) && !empty($re_data['link_botao_slideshow'])) {
+			$error = "Digite um rótulo para o botão!";
+		} else if (!empty($re_data['rotulo_botao_slideshow']) && empty($re_data['link_botao_slideshow'])) {
+			$error = "Digite um link para o botão!";
+		} else {
+			$query   = mysqli_query($conn, "UPDATE logomaq_slideshow SET titulo_slideshow='".$re_data['titulo_slideshow']."', descricao_slideshow='".$re_data['descricao_slideshow']."',
+											rotulo_botao_slideshow='".$re_data['rotulo_botao_slideshow']."', link_botao_slideshow='".$re_data['link_botao_slideshow']."', visivel_slideshow=".$re_data['visivel_slideshow']." WHERE id_slideshow = ".$re_data['id_slideshow']."");
+			if ($query) {
+				return true;
+			} else {
+				$error = mysqli_error($conn);
+				return false;
+			}
+		}
+	}
+	
+	function LM_RemoveSlide($slide_id){
+		global $conn, $error;
+		if (!isset($_SESSION)) {
+			session_start();
+		}
+		$slide_id = LM_Secure($slide_id);
+		if (empty($slide_id) OR !intval($slide_id)) {
+			$error = "Slide inválido!";
+			return false;			
+		} else {
+			$query   = mysqli_query($conn, "DELETE FROM logomaq_slideshow WHERE `id_slideshow`={$slide_id}");
+			if ($query) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
+	
+	
+	function LM_AtualizaSlideVisibilidade ($slide_id, $visibilidade) {
+		global $conn, $error;
+		$slide_id = LM_Secure($slide_id);
+		if (empty($slide_id) OR !intval($slide_id)) {
+			$error = "Slide inválido!";
+		} else {
+			$query   = mysqli_query($conn, "UPDATE logomaq_slideshow SET visivel_slideshow=".LM_Secure($visibilidade)." WHERE id_slideshow = ".$slide_id."");
+			if ($query) {
+				return true;
+			} else {
+				$error = mysqli_error($conn);
+				return false;
+			}
+		}
+	}
+	
+	
 	function XC_LoginCliente($login, $senha) {
 		global $conn;
 		if (!empty($login) && !empty($senha)) {

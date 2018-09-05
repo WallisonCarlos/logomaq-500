@@ -13,7 +13,7 @@
                                     <a href="?pag=novoSlide">Criar novo</a>
                                 </li>
                                 <li>
-                                    <a href="index2.html">Listar todos</a>
+                                    <a href="?pag=listarSlides">Listar todos</a>
                                 </li>
                             </ul>
                         </li>
