@@ -21,6 +21,12 @@
 			include "listarServicos.php";
 		} else if ($pag == "editarServico") {
 			include "editarServico.php";
+		} else if ($pag == "novoCliente") {
+			include "adicionarNovoCliente.php";
+		} else if ($pag == "listarClientes") {
+			include "listarClientes.php";
+		} else if ($pag == "editarCliente") {
+			include "editarCliente.php";
 		} else {
 			echo "Página não encontrada";
 		}

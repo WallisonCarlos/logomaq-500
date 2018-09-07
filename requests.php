@@ -54,6 +54,96 @@
 			exit();
 		}
 		
+		if ($f == "novoCliente") {	
+			if (isset($_FILES['logomarca_cliente']['name'])) {
+				$invalid_file = 0;
+				if ($_FILES['logomarca_cliente']['size'] > 10000000) {
+					$invalid_file = 1;
+				} else {
+					$fileInfo = array(
+						'file' => $_FILES["logomarca_cliente"]["tmp_name"],
+						'name' => $_FILES['logomarca_cliente']['name'],
+						'size' => $_FILES["logomarca_cliente"]["size"],
+						'type' => $_FILES["logomarca_cliente"]["type"]
+					);
+					$media    = LM_ShareFile($fileInfo);
+					if (!empty($media)) {
+						$mediaFilename = $media['filename'];
+						$mediaName     = $media['name'];
+					}
+				}
+			}
+			
+			$cliente_data = array(
+				"nome_cliente" => LM_Secure($_POST['nome_cliente']),
+				"logomarca_cliente" => $mediaFilename
+			);
+			$error = "";
+			$data = array();
+			$cliente_data = LM_NovoCliente($cliente_data);
+			if ($cliente_data) {
+				$data = array(
+					'status' => 200,
+					'invalid_file' => $invalid_file,
+					'success' => "Cliente cadastrado com sucesso, veja clicando <a href='?pag=listarClientes'>aqui</a>!"
+				);
+			} else {
+				$data = array(
+					'status' => 400,
+					'invalid_file' => $invalid_file,
+					'error' => $error
+				);
+			} 
+			header("Content-type: application/json");
+			echo json_encode($data);
+			exit();
+		}
+		
+		if ($f == "atualizaCliente") {	
+			if (isset($_FILES['logomarca_cliente']['name'])) {
+				$invalid_file = 0;
+				if ($_FILES['logomarca_cliente']['size'] > 10000000) {
+					$invalid_file = 1;
+				} else {
+					$fileInfo = array(
+						'file' => $_FILES["logomarca_cliente"]["tmp_name"],
+						'name' => $_FILES['logomarca_cliente']['name'],
+						'size' => $_FILES["logomarca_cliente"]["size"],
+						'type' => $_FILES["logomarca_cliente"]["type"]
+					);
+					$media    = LM_ShareFile($fileInfo);
+					if (!empty($media)) {
+						$mediaFilename = $media['filename'];
+						$mediaName     = $media['name'];
+					}
+				}
+			}
+			
+			$cliente_data = array(
+				"nome_cliente" => LM_Secure($_POST['nome_cliente']),
+				"id_cliente" => LM_Secure($_POST['id_cliente']),
+				"logomarca_cliente" => $mediaFilename
+			);
+			$error = "";
+			$data = array();
+			$cliente_data = LM_AtualizaCliente($cliente_data);
+			if ($cliente_data) {
+				$data = array(
+					'status' => 200,
+					'success' => "Cliente atualizado com sucesso!"
+				);
+			} else {
+				$data = array(
+					'status' => 400,
+					'error' => $error
+				);
+			} 
+			header("Content-type: application/json");
+			echo json_encode($data);
+			exit();
+		}
+		
+		
 		if ($f == "novoServico") {	
 			if (isset($_FILES['imagem_servico']['name'])) {
 				$invalid_file = 0;

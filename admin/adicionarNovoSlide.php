@@ -112,7 +112,7 @@ function novoSlide() {
 					result.html("<div class=\"alert alert-success\" role=\"alert\">"+data.success+"</div>");
 				  } 
 				  else if (data.status == 400) {
-					result.html("<div class=\"alert alert-success\" role=\"alert\">"+data.error+"</div>");
+					result.html("<div class=\"alert alert-danger\" role=\"alert\">"+data.error+"</div>");
 				  } 
 				}
 			  });

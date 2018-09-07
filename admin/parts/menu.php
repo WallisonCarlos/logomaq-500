@@ -35,9 +35,17 @@
                                 </li>
                             </ul>
                         </li>
-                        <li>
-                            <a href="">
+                        <li class="has-sub">
+                            <a class="js-arrow" href="#">
                                 <i class="fas fa-users"></i>Clientes</a>
+                            <ul class="navbar-mobile-sub__list list-unstyled js-sub-list">
+                                <li>
+                                    <a href="?pag=novoCliente">Criar novo</a>
+                                </li>
+                                <li>
+                                    <a href="?pag=listarClientes">Listar todos</a>
+                                </li>
+                            </ul>
                         </li>
                         <li>
                             <a href="table.html">

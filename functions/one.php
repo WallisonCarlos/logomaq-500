@@ -108,6 +108,21 @@
 		}
 	}
 	
+	function LM_NovoCliente($re_data) {
+		global $conn, $error;
+		if (empty($re_data['logomarca_cliente'])) {
+			$error = "Selecione uma imagem!";
+			return false;
+		} else if (empty($re_data['nome_cliente'])) {
+			$error = "Digite um nome!";
+		} else {
+			$fields  = '`' . implode('`, `', array_keys($re_data)) . '`';
+			$data    = '\'' . implode('\', \'', $re_data) . '\'';
+			$query   = mysqli_query($conn, "INSERT INTO logomaq_cliente ({$fields}) VALUES ({$data})");
+			return mysqli_insert_id($conn);
+		}
+	}
+	
 	function LM_AtualizaServico ($re_data) {
 		global $conn, $error;
 		if (empty($re_data['titulo_servico'])) {
@@ -124,6 +139,24 @@
 			} else {
 				$query   = mysqli_query($conn, "UPDATE logomaq_servicos SET titulo_servico='".$re_data['titulo_servico']."', categoria_servico=".$re_data['categoria_servico']."
 											WHERE id_servico = ".$re_data['id_servico']."");
+			}
+			
+			return $query;
+		}
+	}
+	
+	function LM_AtualizaCliente ($re_data) {
+		global $conn, $error;
+		if (empty($re_data['nome_cliente'])) {
+			$error = "Digite um nome!";
+		} else {
+			$cliente = LM_GetCliente($re_data['id_cliente']);
+			$query = false;
+			if (!empty($re_data['logomarca_cliente'])) {
+				unlink($cliente['logomarca_cliente']);
+				$query   = mysqli_query($conn, "UPDATE logomaq_cliente SET nome_cliente='".$re_data['nome_cliente']."', logomarca_cliente='".$re_data['logomarca_cliente']."' WHERE id_cliente = ".$re_data['id_cliente']."");
+			} else {
+				$query   = mysqli_query($conn, "UPDATE logomaq_cliente SET nome_cliente='".$re_data['nome_cliente']."' WHERE id_cliente = ".$re_data['id_cliente']."");
 			}
 			
 			return $query;
@@ -213,6 +246,16 @@
 		return $data;
 	}
 	
+	function LM_GetClientes(){
+		global $conn;
+		$data = array();
+		$query = mysqli_query($conn, "SELECT * FROM logomaq_cliente");
+		while ($final_fetched_data = mysqli_fetch_assoc($query)) {
+			$data[] = $final_fetched_data;
+		}
+		return $data;
+	}
+	
 	function LM_GetCategorias(){
 		global $conn;
 		$data = array();
@@ -242,6 +285,20 @@
 			return false;
 		}
 		$query = mysqli_query($conn, "SELECT * FROM logomaq_slideshow WHERE `id_slideshow` = {$id}");
+		if (mysqli_num_rows($query) == 1) {
+			$final_fetched_data              = mysqli_fetch_assoc($query);
+			return $final_fetched_data;
+		}
+		return false;
+	}
+	
+	function LM_GetCliente($id){
+		global $conn;
+		$id = LM_Secure($id);
+		if (empty($id) || !is_numeric($id) || $id < 1) {
+			return false;
+		}
+		$query = mysqli_query($conn, "SELECT * FROM logomaq_cliente WHERE `id_cliente` = {$id}");
 		if (mysqli_num_rows($query) == 1) {
 			$final_fetched_data              = mysqli_fetch_assoc($query);
 			return $final_fetched_data;
@@ -327,6 +384,27 @@
 			$query   = mysqli_query($conn, "DELETE FROM logomaq_slideshow WHERE `id_slideshow`={$slide_id}");
 			if ($query) {
 				unlink("".$slide['imagem_slideshow']);
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
+	
+	function LM_RemoveCliente($cliente_id){
+		global $conn, $error;
+		if (!isset($_SESSION)) {
+			session_start();
+		}
+		$cliente_id = LM_Secure($cliente_id);
+		if (empty($cliente_id) OR !intval($cliente_id)) {
+			$error = "Cliente inválido!";
+			return false;			
+		} else {
+			$cliente = LM_GetCliente($cliente_id);
+			$query   = mysqli_query($conn, "DELETE FROM logomaq_cliente WHERE `id_cliente`={$cliente_id}");
+			if ($query) {
+				unlink("".$cliente['logomarca_cliente']);
 				return true;
 			} else {
 				return false;
