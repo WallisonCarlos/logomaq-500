@@ -91,6 +91,45 @@
 		}
 	}
 	
+	function LM_NovoServico ($re_data) {
+		global $conn, $error;
+		if (empty($re_data['imagem_servico'])) {
+			$error = "Selecione uma imagem!";
+			return false;
+		} else if (empty($re_data['titulo_servico'])) {
+			$error = "Digite um título!";
+		} else if (empty($re_data['categoria_servico'])) {
+			$error = "Selecione uma categoria!";
+		} else {
+			$fields  = '`' . implode('`, `', array_keys($re_data)) . '`';
+			$data    = '\'' . implode('\', \'', $re_data) . '\'';
+			$query   = mysqli_query($conn, "INSERT INTO logomaq_servicos ({$fields}) VALUES ({$data})");
+			return mysqli_insert_id($conn);
+		}
+	}
+	
+	function LM_AtualizaServico ($re_data) {
+		global $conn, $error;
+		if (empty($re_data['titulo_servico'])) {
+			$error = "Digite um título!";
+		} else if (empty($re_data['categoria_servico'])) {
+			$error = "Selecione uma categoria!";
+		} else {
+			$servico = LM_GetServico($re_data['id_servico']);
+			$query = false;
+			if (!empty($re_data['imagem_servico'])) {
+				unlink($servico['imagem_servico']);
+				$query   = mysqli_query($conn, "UPDATE logomaq_servicos SET titulo_servico='".$re_data['titulo_servico']."', categoria_servico=".$re_data['categoria_servico'].",
+											imagem_servico='".$re_data['imagem_servico']."' WHERE id_servico = ".$re_data['id_servico']."");
+			} else {
+				$query   = mysqli_query($conn, "UPDATE logomaq_servicos SET titulo_servico='".$re_data['titulo_servico']."', categoria_servico=".$re_data['categoria_servico']."
+											WHERE id_servico = ".$re_data['id_servico']."");
+			}
+			
+			return $query;
+		}
+	}
+	
 	function LM_NovaCategoria ($re_data) {
 		global $conn, $error;
 		if (empty($re_data['titulo_categoria'])) {
@@ -184,6 +223,17 @@
 		return $data;
 	}
 	
+	function LM_GetServicos(){
+		global $conn;
+		$data = array();
+		$query = mysqli_query($conn, "SELECT * FROM logomaq_servicos");
+		while ($final_fetched_data = mysqli_fetch_assoc($query)) {
+			$final_fetched_data['categoria_servico'] = LM_GetCategoria($final_fetched_data['categoria_servico']);
+			$data[] = $final_fetched_data;
+		}
+		return $data;
+	}
+	
 	
 	function LM_GetSlide($id){
 		global $conn;
@@ -194,6 +244,21 @@
 		$query = mysqli_query($conn, "SELECT * FROM logomaq_slideshow WHERE `id_slideshow` = {$id}");
 		if (mysqli_num_rows($query) == 1) {
 			$final_fetched_data              = mysqli_fetch_assoc($query);
+			return $final_fetched_data;
+		}
+		return false;
+	}
+	
+	function LM_GetServico($id){
+		global $conn;
+		$id = LM_Secure($id);
+		if (empty($id) || !is_numeric($id) || $id < 1) {
+			return false;
+		}
+		$query = mysqli_query($conn, "SELECT * FROM logomaq_servicos WHERE `id_servico` = {$id}");
+		if (mysqli_num_rows($query) == 1) {
+			$final_fetched_data              = mysqli_fetch_assoc($query);
+			$final_fetched_data['categoria_servico'] = LM_GetCategoria($final_fetched_data['categoria_servico']);
 			return $final_fetched_data;
 		}
 		return false;
@@ -258,8 +323,31 @@
 			$error = "Slide inválido!";
 			return false;			
 		} else {
+			$slide = LM_GetSlide($slide_id);
 			$query   = mysqli_query($conn, "DELETE FROM logomaq_slideshow WHERE `id_slideshow`={$slide_id}");
 			if ($query) {
+				unlink("".$slide['imagem_slideshow']);
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
+	
+	function LM_RemoveServico($servico_id){
+		global $conn, $error;
+		if (!isset($_SESSION)) {
+			session_start();
+		}
+		$servico_id = LM_Secure($servico_id);
+		if (empty($servico_id) OR !intval($servico_id)) {
+			$error = "Serviço inválido!";
+			return false;			
+		} else {
+			$servico = LM_GetServico($servico_id);
+			$query   = mysqli_query($conn, "DELETE FROM logomaq_servicos WHERE `id_servico`={$servico_id}");
+			if ($query) {
+				unlink("".$servico['imagem_servico']);
 				return true;
 			} else {
 				return false;

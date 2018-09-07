@@ -54,6 +54,97 @@
 			exit();
 		}
 		
+		if ($f == "novoServico") {	
+			if (isset($_FILES['imagem_servico']['name'])) {
+				$invalid_file = 0;
+				if ($_FILES['imagem_servico']['size'] > 10000000) {
+					$invalid_file = 1;
+				} else {
+					$fileInfo = array(
+						'file' => $_FILES["imagem_servico"]["tmp_name"],
+						'name' => $_FILES['imagem_servico']['name'],
+						'size' => $_FILES["imagem_servico"]["size"],
+						'type' => $_FILES["imagem_servico"]["type"]
+					);
+					$media    = LM_ShareFile($fileInfo);
+					if (!empty($media)) {
+						$mediaFilename = $media['filename'];
+						$mediaName     = $media['name'];
+					}
+				}
+			}
+			
+			$servico_data = array(
+				"titulo_servico" => LM_Secure($_POST['titulo_servico']),
+				"categoria_servico" => LM_Secure($_POST['categoria_servico']),
+				"imagem_servico" => $mediaFilename
+			);
+			$error = "";
+			$data = array();
+			$servico_data = LM_NovoServico($servico_data);
+			if ($servico_data) {
+				$data = array(
+					'status' => 200,
+					'invalid_file' => $invalid_file,
+					'success' => "Serviço cadastrado com sucesso, veja clicando <a href='?pag=listarServicos'>aqui</a>!"
+				);
+			} else {
+				$data = array(
+					'status' => 400,
+					'invalid_file' => $invalid_file,
+					'error' => $error
+				);
+			} 
+			header("Content-type: application/json");
+			echo json_encode($data);
+			exit();
+		}
+		
+		
+		if ($f == "atualizaServico") {	
+			$mediaFilename =  "";
+			if (isset($_FILES['imagem_servico']['name'])) {
+				if ($_FILES['imagem_servico']['size'] > 10000000) {
+				} else {
+					$fileInfo = array(
+						'file' => $_FILES["imagem_servico"]["tmp_name"],
+						'name' => $_FILES['imagem_servico']['name'],
+						'size' => $_FILES["imagem_servico"]["size"],
+						'type' => $_FILES["imagem_servico"]["type"]
+					);
+					$media    = LM_ShareFile($fileInfo);
+					if (!empty($media)) {
+						$mediaFilename = $media['filename'];
+						$mediaName     = $media['name'];
+					}
+				}
+			}
+			
+			$servico_data = array(
+				"titulo_servico" => LM_Secure($_POST['titulo_servico']),
+				"categoria_servico" => LM_Secure($_POST['categoria_servico']),
+				"id_servico" => LM_Secure($_POST['id_servico']),
+				"imagem_servico" => $mediaFilename
+			);
+			$error = "";
+			$data = array();
+			$servico_data = LM_AtualizaServico($servico_data);
+			if ($servico_data) {
+				$data = array(
+					'status' => 200,
+					'success' => "Serviço atualizado com sucesso!"
+				);
+			} else {
+				$data = array(
+					'status' => 400,
+					'error' => $error
+				);
+			} 
+			header("Content-type: application/json");
+			echo json_encode($data);
+			exit();
+		}
+		
 		if ($f == "novaCategoria") {	
 			
 			$categoria_data = array(
@@ -162,6 +253,27 @@
 				$data = array(
 					'status' => 200,
 					'success' => "Categoria removida com sucesso!"
+				);
+			} else {
+				$data = array(
+					'status' => 400,
+					'error' => $error
+				);
+			} 
+			header("Content-type: application/json");
+			echo json_encode($data);
+			exit();
+		}
+		
+		if ($f == "removeServico") {
+			$error = "";
+			$data = array();
+			$id = LM_Secure($_POST['id_servico']);
+			$servico = LM_RemoveServico ($id);
+			if ($servico) {
+				$data = array(
+					'status' => 200,
+					'success' => "Serviço removido com sucesso!"
 				);
 			} else {
 				$data = array(

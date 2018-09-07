@@ -22,10 +22,10 @@
                                 <i class="fas fa-cubes"></i>Serviços</a>
                             <ul class="navbar-mobile-sub__list list-unstyled js-sub-list">
                                 <li>
-                                    <a href="index.html">Criar novo</a>
+                                    <a href="?pag=novoServico">Criar novo</a>
                                 </li>
                                 <li>
-                                    <a href="index2.html">Listar todos</a>
+                                    <a href="?pag=listarServicos">Listar todos</a>
                                 </li>
 								<li>
                                     <a href="?pag=novaCategoriaServico">Criar nova categoria</a>

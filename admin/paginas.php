@@ -15,6 +15,12 @@
 			include "listarCategoriasServico.php";
 		} else if ($pag == "editarCategoria") {
 			include "editarCategoriaServico.php";
+		} else if ($pag == "novoServico") {
+			include "adicionarNovoServico.php";
+		} else if ($pag == "listarServicos") {
+			include "listarServicos.php";
+		} else if ($pag == "editarServico") {
+			include "editarServico.php";
 		} else {
 			echo "Página não encontrada";
 		}
